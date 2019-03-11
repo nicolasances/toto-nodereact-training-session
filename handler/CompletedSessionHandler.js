@@ -19,7 +19,7 @@ exports.do = (event) => {
     let start = data.startedAt;
     let end = data.finishedAt;
 
-    let timeInMin = moment(start, 'HH:mm').tz('Europe/Rome').diff(moment(end, 'HH:mm').tz('Europe/Rome'), 'minutes');
+    let timeInMin = moment(end, 'HH:mm').tz('Europe/Rome').diff(moment(start, 'HH:mm').tz('Europe/Rome'), 'minutes');
 
     // 3. Update the session
     updateSession.do(correlationId, sessionId, {timeInMinutes: timeInMin}).then(() => {
