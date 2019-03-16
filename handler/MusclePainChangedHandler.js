@@ -35,11 +35,11 @@ exports.do = (event) => {
       logger.comput(correlationId, 'Successfully set the pain level for session ' + sessionId + ' to ' + sessionPainLevel);
 
     }, (err) => {
-      logger.compute(correlationId, 'Error when trying to PUS /sessions/' + sessionId + '. Err: ' + err, 'error');
+      logger.compute(correlationId, 'Error when trying to PUT /sessions/' + sessionId + '. Err: ' + JSON.stringify(err), 'error');
     });;
 
   }, (err) => {
-    logger.compute(correlationId, 'Error when trying to GET /sessions/' + sessionId + '. Err: ' + err, 'error');
+    logger.compute(correlationId, 'Error when trying to GET /sessions/' + sessionId + '. Err: ' + JSON.stringify(err), 'error');
   });
 
 }
