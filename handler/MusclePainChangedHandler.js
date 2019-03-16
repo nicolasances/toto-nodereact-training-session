@@ -1,7 +1,7 @@
 var logger = require('toto-logger');
 var moment = require('moment-timezone');
 var getSession = require('./integration/GetSession');
-var updateSession = require('./integration/UpdateSession');
+var putSession = require('./integration/UpdateSession');
 
 /**
  * Reacts to a completed session.
