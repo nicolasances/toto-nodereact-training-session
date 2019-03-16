@@ -60,7 +60,10 @@ exports.do = (event) => {
         // Update the session
         putSession.do(correlationId, sessionId, {muscles: muscles}).then(() => {
 
-          calculateSessionPainLevel(sessionData);
+          // Retry getting the session data and update the damn thing
+          getSession.do(correlationId, sessionId).then((sd) => {
+            calculateSessionPainLevel(sd);
+          });
 
         }, (err) => {
           logger.compute(correlationId, 'Error when trying to PUT /sessions/' + sessionId + '. Err: ' + JSON.stringify(err), 'error');
