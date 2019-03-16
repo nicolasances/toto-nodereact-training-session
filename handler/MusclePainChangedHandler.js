@@ -1,6 +1,7 @@
 var logger = require('toto-logger');
 var moment = require('moment-timezone');
 var getSession = require('./integration/GetSession');
+var getSessionMuscles = require('./integration/GetSessionMuscles');
 var putSession = require('./integration/UpdateSession');
 
 /**
@@ -11,35 +12,67 @@ exports.do = (event) => {
 
   let correlationId = event.correlationId;
   let sessionId = event.sessionId;
+  let muscle = event.muscle;
+  let painLevel = event.painLevel;
 
   // 1. Get the session data
-  getSession.do(correlationId, sessionId).then((data) => {
+  getSession.do(correlationId, sessionId).then((sessionData) => {
 
-    // 2. Calculate the new pain level
-    let muscles = data.muscles;
-    let sumOfPains = 0;
-    let numOfPains = 0;
+    var calculateSessionPainLevel = (sessionData) => {
 
-    for (var i = 0; i < muscles.length; i++) {
-      if (muscles[i].painLevel != null) {
-        numOfPains++;
-        sumOfPains += muscles[i].painLevel;
+      // 2. Calculate the new pain level
+      let muscles = sessionData.muscles;
+      let sumOfPains = 0;
+      let numOfPains = 0;
+
+      for (var i = 0; i < muscles.length; i++) {
+        if (muscles[i].painLevel != null) {
+          numOfPains++;
+          sumOfPains += muscles[i].painLevel;
+        }
       }
+
+      let sessionPainLevel = numOfPains == 0 ? 0 : Math.floor(sumOfPains / numOfPains);
+
+      // 3. Update the session pain level
+      putSession.do(correlationId, sessionId, {postWorkoutPain: sessionPainLevel}).then(() => {
+
+        logger.compute(correlationId, 'Successfully set the pain level for session ' + sessionId + ' to ' + sessionPainLevel, 'info');
+
+      }, (err) => {
+        logger.compute(correlationId, 'Error when trying to PUT /sessions/' + sessionId + '. Err: ' + JSON.stringify(err), 'error');
+      });
+
     }
 
-    let sessionPainLevel = numOfPains == 0 ? 0 : Math.floor(sumOfPains / numOfPains);
+    // If there are no muscles, it's either an OLD SESSION or something went wrong
+    // SO CREATE THE MUSCLES, set the pain level and then go on
+    if (data.muscles == null || data.muscles.length == 0) {
 
-    // 3. Update the session pain level
-    putSession.do(correlationId, sessionId, {postWorkoutPain: sessionPainLevel}).then(() => {
+      // Get the muscles
+      getSessionMuscles.do(correlationId, sessionId).then((data) => {
 
-      logger.compute(correlationId, 'Successfully set the pain level for session ' + sessionId + ' to ' + sessionPainLevel, 'info');
+        let muscles = [];
+        for (var i = 0; i < data.muscles.length; i++) {
+          muscles.push({muscle: data.muscles[i], painLevel: data.muscles[i] == muscle ? painLevel : null});
+        }
 
-    }, (err) => {
-      logger.compute(correlationId, 'Error when trying to PUT /sessions/' + sessionId + '. Err: ' + JSON.stringify(err), 'error');
-    });;
+        // Update the session
+        putSession.do(correlationId, sessionId, {muscles: muscles}).then(() => {
 
-  }, (err) => {
-    logger.compute(correlationId, 'Error when trying to GET /sessions/' + sessionId + '. Err: ' + JSON.stringify(err), 'error');
+          calculateSessionPainLevel(sessionData);
+
+        }, (err) => {
+          logger.compute(correlationId, 'Error when trying to PUT /sessions/' + sessionId + '. Err: ' + JSON.stringify(err), 'error');
+        });
+
+      }, (err) => {
+        logger.compute(correlationId, 'Error when trying to GET /sessions/' + sessionId + '/muscles. Err: ' + JSON.stringify(err), 'error');
+      });
+
+    }
+    else calculateSessionPainLevel(sessionData);
+
   });
 
 }
