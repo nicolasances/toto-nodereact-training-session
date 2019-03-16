@@ -32,7 +32,7 @@ exports.do = (event) => {
     // 3. Update the session pain level
     putSession.do(correlationId, sessionId, {postWorkoutPain: sessionPainLevel}).then(() => {
 
-      logger.comput(correlationId, 'Successfully set the pain level for session ' + sessionId + ' to ' + sessionPainLevel);
+      logger.compute(correlationId, 'Successfully set the pain level for session ' + sessionId + ' to ' + sessionPainLevel);
 
     }, (err) => {
       logger.compute(correlationId, 'Error when trying to PUT /sessions/' + sessionId + '. Err: ' + JSON.stringify(err), 'error');
