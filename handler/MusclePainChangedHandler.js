@@ -47,7 +47,7 @@ exports.do = (event) => {
 
     // If there are no muscles, it's either an OLD SESSION or something went wrong
     // SO CREATE THE MUSCLES, set the pain level and then go on
-    if (data.muscles == null || data.muscles.length == 0) {
+    if (sessionData.muscles == null || sessionData.muscles.length == 0) {
 
       // Get the muscles
       getSessionMuscles.do(correlationId, sessionId).then((data) => {
