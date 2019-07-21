@@ -12,7 +12,7 @@
     "express": "^4.16.4",
     "moment-timezone": "^0.5.23",
     "toto-api-controller": "^4.0.0",
-    "toto-event-consumer": "^4.0.0",
+    "toto-event-consumer": "6.0.0",
     "toto-logger": "^4.0.0",
     "toto-request": "^4.0.0"
   }
