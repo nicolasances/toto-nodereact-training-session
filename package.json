@@ -9,7 +9,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "express": "^4.16.4",
+    "express": "^4.18.2",
     "moment-timezone": "^0.5.23",
     "toto-api-controller": "^4.0.0",
     "toto-event-consumer": "6.2.0",
